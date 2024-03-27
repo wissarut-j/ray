@@ -6,7 +6,7 @@ import click
 
 from ray import serve
 from ray.serve._private.benchmarks.common import run_throughput_benchmark
-from ray.serve.handle import DeploymentHandle, RayServeHandle
+from ray.serve.handle import DeploymentHandle
 
 
 @serve.deployment(ray_actor_options={"num_cpus": 0})
@@ -22,7 +22,7 @@ class Downstream:
 class Caller:
     def __init__(
         self,
-        downstream: RayServeHandle,
+        downstream: DeploymentHandle,
         *,
         batch_size: int,
         num_trials: int,
@@ -30,17 +30,17 @@ class Caller:
     ):
         logging.getLogger("ray.serve").setLevel(logging.WARNING)
 
-        self._h: DeploymentHandle = downstream.options(use_new_handle_api=True)
+        self._h = downstream
         self._batch_size = batch_size
         self._num_trials = num_trials
         self._trial_runtime = trial_runtime
 
-    async def do_single_batch(self):
+    async def _do_single_batch(self):
         await asyncio.gather(*[self._h.hi.remote() for _ in range(self._batch_size)])
 
-    async def run_throughput_benchmark(self) -> Tuple[float, float]:
+    async def run_benchmark(self) -> Tuple[float, float]:
         return await run_throughput_benchmark(
-            fn=self.do_single_batch,
+            fn=self._do_single_batch,
             multiplier=self._batch_size,
             num_trials=self._num_trials,
             trial_runtime=self._trial_runtime,
@@ -84,9 +84,7 @@ def main(
         num_trials=num_trials,
         trial_runtime=trial_runtime,
     )
-    h = serve.run(app).options(
-        use_new_handle_api=True,
-    )
+    h = serve.run(app)
 
     mean, stddev = h.run_benchmark.remote().result()
     print(
