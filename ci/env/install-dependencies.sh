@@ -416,7 +416,7 @@ install_pip_packages() {
     fi
   fi
 
-  retry_pip_install "CC=gcc pip install -Ur -c python/requirements_compiled.txt ${WORKSPACE_DIR}/python/requirements.txt"
+  retry_pip_install "CC=gcc pip install -Ur --ignore-installed -c python/requirements_compiled.txt ${WORKSPACE_DIR}/python/requirements.txt"
 
   # Install deeplearning libraries (Torch + TensorFlow)
   if [ -n "${TORCH_VERSION-}" ] || [ "${DL-}" = "1" ] || [ "${RLLIB_TESTING-}" = 1 ] || [ "${TRAIN_TESTING-}" = 1 ] || [ "${TUNE_TESTING-}" = 1 ]; then
