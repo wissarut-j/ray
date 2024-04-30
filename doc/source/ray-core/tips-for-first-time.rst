@@ -181,6 +181,8 @@ Let’s now parallelize this code using Ray, by making every invocation of ``tin
     import time
     import ray
 
+    ray.init(num_cpus=4)
+
     @ray.remote
     def tiny_work(x):
         time.sleep(0.0001) # Replace this with work you need to do.
@@ -206,6 +208,8 @@ One way to speed up this program is to make the remote tasks larger in order to 
 
     import time
     import ray
+
+    ray.init(num_cpus=4)
 
     def tiny_work(x):
         time.sleep(0.0001) # replace this is with work you need to do
@@ -262,6 +266,8 @@ However, there are cases when automatically calling ``ray.put()`` on a task invo
     import time
     import numpy as np
     import ray
+
+    ray.init(num_cpus=4)
 
     @ray.remote
     def no_work(a):
@@ -334,6 +340,8 @@ To illustrate this issue, consider the following example where we run four ``do_
     import random
     import ray
 
+    ray.init(num_cpus=4)
+
     @ray.remote
     def do_some_work(x):
         time.sleep(random.uniform(0, 4)) # Replace this with work you need to do.
@@ -367,6 +375,8 @@ Fortunately, Ray allows you to do exactly this by calling ``ray.wait()`` on a li
     import time
     import random
     import ray
+
+    ray.init(num_cpus=4)
 
     @ray.remote
     def do_some_work(x):
